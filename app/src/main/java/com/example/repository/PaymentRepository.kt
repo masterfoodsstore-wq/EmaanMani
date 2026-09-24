@@ -288,6 +288,30 @@ class PaymentRepository {
 
         _deposits.value = listOf(deposit) + _deposits.value
         // CRITICAL: User's balance does NOT increase simply because deposit was submitted!
+
+        // Live Cloud Firestore synchronization for web admin cashier
+        try {
+            val db = FirebaseManager.firestore
+            val auth = FirebaseManager.auth
+            if (db != null) {
+                val trxMap = hashMapOf(
+                    "trxId" to "DEP_${deposit.id}",
+                    "userId" to (auth?.currentUser?.uid ?: user.id.toString()),
+                    "numericUserId" to user.id,
+                    "userName" to user.name,
+                    "type" to "DEPOSIT",
+                    "amount" to amount,
+                    "paymentMethod" to provider.name,
+                    "senderNumber" to senderNumber.trim(),
+                    "transactionRef" to cleanRef,
+                    "proofNote" to proofNote.trim(),
+                    "status" to "PENDING",
+                    "createdAt" to System.currentTimeMillis()
+                )
+                db.collection("transactions").add(trxMap)
+            }
+        } catch (_: Exception) {}
+
         return Pair(true, "Deposit request #${deposit.id} submitted. Pending admin verification.")
     }
 
@@ -432,6 +456,28 @@ class PaymentRepository {
             description = "Funds reserved for withdrawal #${withdrawal.id} via ${provider.name}"
         )
         _transactions.value = listOf(ledgerTx) + _transactions.value
+
+        // Live Cloud Firestore synchronization for web admin cashier
+        try {
+            val db = FirebaseManager.firestore
+            val auth = FirebaseManager.auth
+            if (db != null) {
+                val trxMap = hashMapOf(
+                    "trxId" to "WTH_${withdrawal.id}",
+                    "userId" to (auth?.currentUser?.uid ?: user.id.toString()),
+                    "numericUserId" to user.id,
+                    "userName" to user.name,
+                    "type" to "WITHDRAWAL",
+                    "amount" to amount,
+                    "paymentMethod" to provider.name,
+                    "senderNumber" to accountNumber.trim(),
+                    "transactionRef" to accountName.trim(),
+                    "status" to "PENDING",
+                    "createdAt" to System.currentTimeMillis()
+                )
+                db.collection("transactions").add(trxMap)
+            }
+        } catch (_: Exception) {}
 
         return Pair(true, "Withdrawal #${withdrawal.id} submitted! Reserved PKR $amount safely.")
     }

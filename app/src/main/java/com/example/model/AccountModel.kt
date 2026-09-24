@@ -17,7 +17,9 @@ data class UserAccount(
     val createdAt: Long = System.currentTimeMillis(),
     val lastLoginAt: Long = System.currentTimeMillis(),
     val isAdmin: Boolean = false,
-    val sessionToken: String? = null
+    val sessionToken: String? = null,
+    val status: String = "ACTIVE",
+    val firebaseUid: String? = null
 ) {
     val formattedCreatedAt: String
         get() = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(createdAt))

@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.admin == true ||
+        request.auth.token.email == "admin@zoo3d.game" ||
+        request.auth.token.email == "admin@royalx.com" ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true)
+      );
+    }
+
+    // USERS COLLECTION
+    // Users can read their own profile, Admins can read all profiles
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+
+      // New users can create their own account document with initial bonus
+      allow create: if isOwner(userId)
+                    && request.resource.data.uid == userId
+                    && request.resource.data.balance <= 100
+                    && request.resource.data.isAdmin == false;
+
+      // Sensitive fields like balance, isAdmin, status, and role cannot be directly updated by clients
+      allow update: if isAdmin() || (
+        isOwner(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['balance', 'isAdmin', 'role', 'status', 'id'])
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // LIVE GAME CONFIGURATION
+    // All authenticated players can read live game switches & announcements in real-time
+    // Only Administrators can modify configuration
+    match /app_config/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // LIVE ANNOUNCEMENTS
+    match /announcements/{announcementId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // TRANSACTIONS & FINANCIAL LEDGER
+    match /transactions/{trxId} {
+      // Users can read only their own transactions, Admin can read all
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+
+      // Users can submit a pending deposit request
+      allow create: if isAuthenticated() && (
+        isAdmin() || (
+          request.resource.data.userId == request.auth.uid &&
+          request.resource.data.status == 'PENDING' &&
+          request.resource.data.type in ['DEPOSIT', 'WITHDRAWAL']
+        )
+      );
+
+      // Only Admins or Cloud Functions (Admin SDK) can approve/update transaction status
+      allow update: if isAdmin();
+      allow delete: if false; // Immutable financial ledger
+    }
+
+    // GAME ROUNDS AUDIT
+    match /game_rounds/{roundId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // ADMIN AUDIT LOGS
+    match /admin_audit_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

@@ -127,6 +127,9 @@ class GamingViewModel(application: Application) : AndroidViewModel(application) 
     private var zooGameLoopJob: Job? = null
 
     init {
+        // Start real-time Firestore synchronization for live remote game config & broadcast ticker
+        LiveGameConfigManager.startRealtimeSync()
+
         // Collect server-side admin session state
         viewModelScope.launch {
             adminSecurityService.currentSession.collect { sess ->

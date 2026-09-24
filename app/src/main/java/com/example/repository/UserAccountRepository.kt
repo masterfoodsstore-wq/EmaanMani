@@ -2,11 +2,16 @@ package com.example.repository
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import com.example.model.AuthResult
 import com.example.model.UserAccount
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.MessageDigest
@@ -14,8 +19,8 @@ import java.util.UUID
 
 /**
  * Secure User Account Repository.
- * Handles account creation, SHA-256 password hashing, persistent sessions,
- * profile management, and non-monetary entertainment points.
+ * Handles online Firebase Authentication, real-time Cloud Firestore synchronization,
+ * SHA-256 password hashing, persistent sessions, and entertainment balance.
  */
 class UserAccountRepository(private val context: Context) {
 
@@ -27,8 +32,11 @@ class UserAccountRepository(private val context: Context) {
 
     private val usersMap = mutableMapOf<String, UserAccount>() // username/email lowercase -> UserAccount
     private val passwordHashes = mutableMapOf<Long, String>() // userId -> SHA-256 hash
+    private var firestoreUserRegistration: ListenerRegistration? = null
+    private val repoScope = CoroutineScope(Dispatchers.IO)
 
     init {
+        FirebaseManager.initialize(context)
         loadUsersFromStorage()
         restoreSession()
     }
@@ -186,7 +194,8 @@ class UserAccountRepository(private val context: Context) {
             createdAt = System.currentTimeMillis(),
             lastLoginAt = System.currentTimeMillis(),
             isAdmin = cleanEmail.startsWith("admin@"),
-            sessionToken = sessionToken
+            sessionToken = sessionToken,
+            status = "ACTIVE"
         )
 
         usersMap[cleanName.lowercase()] = newUser
@@ -196,6 +205,40 @@ class UserAccountRepository(private val context: Context) {
 
         prefs.edit().putString("active_session_token", sessionToken).apply()
         _currentUser.value = newUser
+
+        // Live Cloud Firestore and Firebase Auth registration
+        repoScope.launch {
+            try {
+                val auth = FirebaseManager.auth
+                val db = FirebaseManager.firestore
+                if (auth != null && db != null) {
+                    auth.createUserWithEmailAndPassword(cleanEmail, password)
+                        .addOnSuccessListener { result ->
+                            val uid = result.user?.uid
+                            if (uid != null) {
+                                val userDoc = hashMapOf(
+                                    "uid" to uid,
+                                    "id" to newId,
+                                    "username" to cleanName,
+                                    "email" to cleanEmail,
+                                    "avatar" to avatar,
+                                    "balance" to NEW_ACCOUNT_BONUS_RS,
+                                    "status" to "ACTIVE",
+                                    "isAdmin" to cleanEmail.startsWith("admin@"),
+                                    "role" to if (cleanEmail.startsWith("admin@")) "admin" else "user",
+                                    "createdAt" to System.currentTimeMillis(),
+                                    "lastLoginAt" to System.currentTimeMillis()
+                                )
+                                db.collection("users").document(uid).set(userDoc)
+                                startFirebaseUserListener(uid)
+                            }
+                        }
+                }
+            } catch (e: Exception) {
+                Log.w("UserAccountRepository", "Firebase registration notice: ${e.message}")
+            }
+        }
+
         return AuthResult.Success(newUser)
     }
 
@@ -224,10 +267,97 @@ class UserAccountRepository(private val context: Context) {
         }
 
         _currentUser.value = updatedUser
+
+        // Live Cloud Firestore and Firebase Auth login & real-time sync
+        repoScope.launch {
+            try {
+                val auth = FirebaseManager.auth
+                if (auth != null) {
+                    val loginEmail = if (query.contains("@")) query else "${query}@game.com"
+                    auth.signInWithEmailAndPassword(loginEmail, password)
+                        .addOnSuccessListener { result ->
+                            result.user?.uid?.let { uid ->
+                                startFirebaseUserListener(uid)
+                            }
+                        }
+                        .addOnFailureListener {
+                            // If user exists locally but not yet in Firebase Auth, auto-register
+                            auth.createUserWithEmailAndPassword(loginEmail, password)
+                                .addOnSuccessListener { regResult ->
+                                    regResult.user?.uid?.let { uid ->
+                                        val db = FirebaseManager.firestore
+                                        val userDoc = hashMapOf(
+                                            "uid" to uid,
+                                            "id" to user.id,
+                                            "username" to user.username,
+                                            "email" to user.email,
+                                            "avatar" to user.avatar,
+                                            "balance" to user.gamePoints,
+                                            "status" to user.status,
+                                            "isAdmin" to user.isAdmin,
+                                            "createdAt" to user.createdAt,
+                                            "lastLoginAt" to System.currentTimeMillis()
+                                        )
+                                        db?.collection("users")?.document(uid)?.set(userDoc)
+                                        startFirebaseUserListener(uid)
+                                    }
+                                }
+                        }
+                }
+            } catch (e: Exception) {
+                Log.w("UserAccountRepository", "Firebase login notice: ${e.message}")
+            }
+        }
+
         return AuthResult.Success(updatedUser)
     }
 
+    private fun startFirebaseUserListener(uid: String) {
+        firestoreUserRegistration?.remove()
+        val db = FirebaseManager.firestore ?: return
+        try {
+            firestoreUserRegistration = db.collection("users").document(uid)
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        Log.w("UserAccountRepository", "Firestore user listener error: ${error.message}")
+                        return@addSnapshotListener
+                    }
+                    if (snapshot != null && snapshot.exists()) {
+                        val serverBalance = snapshot.getDouble("balance")?.toLong()
+                            ?: snapshot.getLong("balance")
+                            ?: _currentUser.value?.gamePoints
+                            ?: 20L
+                        val status = snapshot.getString("status") ?: "ACTIVE"
+                        val isAdmin = snapshot.getBoolean("isAdmin") ?: false
+                        val avatar = snapshot.getString("avatar") ?: (_currentUser.value?.avatar ?: "🦁")
+                        val username = snapshot.getString("username") ?: (_currentUser.value?.username ?: "Player")
+
+                        _currentUser.value?.let { current ->
+                            val updated = current.copy(
+                                gamePoints = serverBalance,
+                                status = status,
+                                isAdmin = isAdmin,
+                                avatar = avatar,
+                                username = username,
+                                firebaseUid = uid
+                            )
+                            _currentUser.value = updated
+                            updateUserInternal(updated)
+                        }
+                    }
+                }
+        } catch (e: Exception) {
+            Log.w("UserAccountRepository", "Failed to attach user snapshot listener: ${e.message}")
+        }
+    }
+
     fun logout() {
+        firestoreUserRegistration?.remove()
+        firestoreUserRegistration = null
+        try {
+            FirebaseManager.auth?.signOut()
+        } catch (_: Exception) {}
+
         val user = _currentUser.value
         if (user != null) {
             val cleared = user.copy(sessionToken = null)
@@ -244,6 +374,10 @@ class UserAccountRepository(private val context: Context) {
         if (newPassword.length < 6) {
             return AuthResult.Error("New password must be at least 6 characters")
         }
+
+        try {
+            FirebaseManager.auth?.sendPasswordResetEmail(cleanEmail)
+        } catch (_: Exception) {}
 
         passwordHashes[user.id] = hashPassword(newPassword)
         saveUsersToStorage()

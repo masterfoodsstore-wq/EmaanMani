@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Royal X • Live Operations & Admin Console</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Firebase App & Services (v10 modular/compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-functions-compat.js"></script>
+</head>
+<body>
+
+  <!-- AUTH OVERLAY FOR UNAPPROVED / LOGGED OUT ADMINS -->
+  <div id="auth-modal" class="auth-overlay">
+    <div class="auth-card">
+      <div class="brand-badge">ROYAL X CASINO</div>
+      <h2>Enterprise Admin Gateway</h2>
+      <p class="auth-subtitle">Sign in with authorized administrator credentials to manage live servers, users, and financial ledgers.</p>
+
+      <div id="auth-alert" class="alert hidden"></div>
+
+      <form id="login-form">
+        <div class="input-group">
+          <label>Admin Email</label>
+          <input type="email" id="login-email" placeholder="admin@royalx.com" required value="admin@zoo3d.game">
+        </div>
+        <div class="input-group">
+          <label>Master Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required value="Admin@2026">
+        </div>
+        <button type="submit" id="btn-login" class="btn-primary">
+          <span class="btn-text">Authenticate Access</span>
+          <span class="loader hidden"></span>
+        </button>
+      </form>
+      <div class="auth-footer">
+        🔒 End-to-end 256-bit encrypted session. Multi-factor authenticated operations.
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN ADMIN DASHBOARD -->
+  <div id="dashboard-container" class="dashboard-layout hidden">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-mark">👑</div>
+        <div class="logo-text">
+          <h1>ROYAL X</h1>
+          <span>LIVE CONTROL</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="overview">
+          <span class="icon">📊</span> Overview
+        </button>
+        <button class="nav-item" data-tab="users">
+          <span class="icon">👥</span> Users & Players
+        </button>
+        <button class="nav-item" data-tab="games">
+          <span class="icon">🎰</span> Game Servers
+        </button>
+        <button class="nav-item" data-tab="transactions">
+          <span class="icon">💳</span> Transactions <span id="pending-badge" class="badge-count">0</span>
+        </button>
+        <button class="nav-item" data-tab="announcements">
+          <span class="icon">📢</span> Live Broadcasts
+        </button>
+        <button class="nav-item" data-tab="settings">
+          <span class="icon">⚙️</span> System Config
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="admin-profile">
+          <div class="avatar" id="current-admin-avatar">👑</div>
+          <div class="info">
+            <span class="name" id="current-admin-email">Admin</span>
+            <span class="role">Root Authority</span>
+          </div>
+        </div>
+        <button id="btn-logout" class="btn-logout" title="Sign Out">🚪 Logout</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <!-- TOP STATUS BAR -->
+      <header class="topbar">
+        <div class="breadcrumbs">
+          <span id="active-tab-title">Platform Overview</span>
+        </div>
+        <div class="topbar-actions">
+          <div class="status-indicator">
+            <span class="pulse-dot"></span>
+            <span id="connection-status">Connecting to Firestore...</span>
+          </div>
+          <button id="btn-refresh" class="btn-icon" title="Refresh Data">🔄</button>
+        </div>
+      </header>
+
+      <!-- TAB 1: OVERVIEW -->
+      <section id="tab-overview" class="tab-pane active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Registered Players</div>
+            <div class="stat-value" id="stat-total-users">0</div>
+            <div class="stat-sub text-success">🟢 Real-time sync</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Platform Vault Balance</div>
+            <div class="stat-value gold" id="stat-total-balance">₨ 0</div>
+            <div class="stat-sub">Player held reserves</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pending Cashier Requests</div>
+            <div class="stat-value warning" id="stat-pending-trx">0</div>
+            <div class="stat-sub" id="stat-pending-breakdown">0 Deposits • 0 Withdrawals</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Live Active Table Status</div>
+            <div class="stat-value text-accent" id="stat-tables-online">3 / 3</div>
+            <div class="stat-sub" id="stat-maintenance-status">Normal Gameplay</div>
+          </div>
+        </div>
+
+        <div class="two-column-layout">
+          <!-- Recent Transactions -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Cashier Activities</h3>
+              <button class="btn-text-action" onclick="switchTab('transactions')">View All</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Trx ID</th>
+                    <th>Player</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="overview-trx-tbody">
+                  <tr><td colspan="5" class="empty-state">Loading recent records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quick Game Server Controls -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Live Game Switchboard</h3>
+              <button class="btn-text-action" onclick="switchTab('games')">Configure</button>
+            </div>
+            <div class="switchboard-list">
+              <div class="switch-item">
+                <div class="switch-info">
+                  <strong>🐉 Dragon vs. Tiger 3D</strong>
+                  <span>Main 2-Card Duel Arena</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="quick-toggle-dragon" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="switch-item">
+                <div class="switch-info">
+                  <strong>🦁 Zoo Roulette 3D</strong>
+                  <span>24-Slot Perimeter Wheel</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="quick-toggle-zoo" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="switch-item">
+                <div class="switch-info">
+                  <strong>🎰 Cyber Slots 777</strong>
+                  <span>High-Volatility Reels</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="quick-toggle-slots">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="maintenance-box">
+                <div class="m-text">
+                  <strong>🚨 Emergency Maintenance Mode</strong>
+                  <p>Pauses all betting tables immediately across connected mobile apps.</p>
+                </div>
+                <button id="btn-quick-maintenance" class="btn-danger-outline">Toggle Maintenance</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: USERS -->
+      <section id="tab-users" class="tab-pane">
+        <div class="card">
+          <div class="card-header user-header">
+            <h3>Player Registry & Account Control</h3>
+            <div class="search-box">
+              <input type="text" id="user-search" placeholder="Search by name, email, ID, or mobile...">
+              <select id="user-status-filter">
+                <option value="ALL">All Statuses</option>
+                <option value="ACTIVE">Active Only</option>
+                <option value="SUSPENDED">Suspended Only</option>
+                <option value="BLOCKED">Blocked Only</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Player</th>
+                  <th>Email</th>
+                  <th>Balance</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody">
+                <tr><td colspan="6" class="empty-state">Loading users from Firestore...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: GAMES -->
+      <section id="tab-games" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3>Live Game Configuration & Remote Timing</h3>
+            <button id="btn-save-games" class="btn-primary">Save & Push OTA Update</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Dragon vs Tiger Round Duration (seconds)</label>
+              <input type="number" id="game-dragon-seconds" min="10" max="60" value="15">
+            </div>
+            <div class="form-group">
+              <label>Zoo Roulette Wheel Duration (seconds)</label>
+              <input type="number" id="game-zoo-seconds" min="12" max="60" value="18">
+            </div>
+            <div class="form-group">
+              <label>Minimum Table Bet Limit (₨)</label>
+              <input type="number" id="game-min-bet" min="1" max="1000" value="10">
+            </div>
+            <div class="form-group">
+              <label>Maximum Table Bet Limit (₨)</label>
+              <input type="number" id="game-max-bet" min="1000" max="500000" value="50000">
+            </div>
+            <div class="form-group">
+              <label>House Commission (%)</label>
+              <input type="number" id="game-commission" step="0.5" min="0" max="15" value="3.0">
+            </div>
+            <div class="form-group">
+              <label>Simulated Online Player Count</label>
+              <input type="number" id="game-player-count" min="100" max="99999" value="2418">
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h4>Global Maintenance Banner Message</h4>
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label>Maintenance Announcement Title</label>
+              <input type="text" id="m-title" value="SYSTEM SERVER UPDATE IN PROGRESS">
+            </div>
+            <div class="form-group span-2">
+              <label>Maintenance Description</label>
+              <input type="text" id="m-message" value="The game server is currently applying an Over-The-Air hot-patch. Live tables will resume in a few moments without requiring APK re-download.">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: TRANSACTIONS -->
+      <section id="tab-transactions" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3>Financial Ledger & Approvals</h3>
+            <div class="search-box">
+              <select id="trx-filter-type">
+                <option value="ALL">All Types</option>
+                <option value="DEPOSIT">Deposits Only</option>
+                <option value="WITHDRAWAL">Withdrawals Only</option>
+                <option value="ADJUSTMENT">Adjustments Only</option>
+              </select>
+              <select id="trx-filter-status">
+                <option value="ALL">All Statuses</option>
+                <option value="PENDING">Pending Approval</option>
+                <option value="APPROVED">Approved / Settled</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ref ID</th>
+                  <th>Player</th>
+                  <th>Method</th>
+                  <th>Amount</th>
+                  <th>Sender Info / Account</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-tbody">
+                <tr><td colspan="8" class="empty-state">Loading transactions from Firestore...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: ANNOUNCEMENTS -->
+      <section id="tab-announcements" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3>Live In-Game Ticker Announcements</h3>
+            <button id="btn-new-announcement" class="btn-primary">+ Add Announcement</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Message</th>
+                  <th>Type</th>
+                  <th>Active</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="announcements-tbody">
+                <tr><td colspan="5" class="empty-state">Loading announcements...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: SETTINGS -->
+      <section id="tab-settings" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3>Firebase & System Connection Configuration</h3>
+          </div>
+          <div class="settings-content">
+            <p>This web dashboard is wired directly to <strong>Cloud Firestore</strong> and <strong>Firebase Authentication</strong>.</p>
+            <div class="info-block">
+              <strong>Connected Firestore Collections:</strong>
+              <ul>
+                <li><code>users</code> — Player account records & real-time balances</li>
+                <li><code>app_config</code> — Remote live game switches, timers, and maintenance state</li>
+                <li><code>announcements</code> — Ticker banners displayed across all live APK instances</li>
+                <li><code>transactions</code> — Immutable deposit, withdrawal, and audit entries</li>
+              </ul>
+            </div>
+            <div class="firebase-config-box">
+              <h4>Firebase Web SDK Configuration</h4>
+              <p>Configure credentials in <code>public/app.js</code> or use the Firebase Hosting default auto-config.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: ADJUST USER BALANCE -->
+  <div id="modal-adjust-balance" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Adjust Player Balance</h3>
+        <button class="modal-close" onclick="closeModal('modal-adjust-balance')">&times;</button>
+      </div>
+      <form id="form-adjust-balance">
+        <input type="hidden" id="adjust-uid">
+        <p>Adjusting balance for: <strong id="adjust-user-name">Player</strong></p>
+        <div class="input-group">
+          <label>Amount (Positive to Credit, Negative to Debit)</label>
+          <input type="number" id="adjust-amount" placeholder="e.g. 500 or -200" required>
+        </div>
+        <div class="input-group">
+          <label>Reason / Audit Note</label>
+          <input type="text" id="adjust-reason" placeholder="e.g. VIP Promo Gift / Manual settlement" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-adjust-balance')">Cancel</button>
+          <button type="submit" class="btn-primary">Apply Adjustment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD ANNOUNCEMENT -->
+  <div id="modal-announcement" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Post Live Broadcast Announcement</h3>
+        <button class="modal-close" onclick="closeModal('modal-announcement')">&times;</button>
+      </div>
+      <form id="form-add-announcement">
+        <div class="input-group">
+          <label>Title</label>
+          <input type="text" id="ann-title" placeholder="e.g. 🔥 Weekend 2X Multiplier Event" required>
+        </div>
+        <div class="input-group">
+          <label>Broadcast Message</label>
+          <input type="text" id="ann-msg" placeholder="e.g. Enjoy double payouts on Zoo Roulette until Sunday midnight!" required>
+        </div>
+        <div class="input-group">
+          <label>Type</label>
+          <select id="ann-type">
+            <option value="PROMO">Promotion / Event</option>
+            <option value="INFO">General Information</option>
+            <option value="MAINTENANCE">Maintenance Notice</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-announcement')">Cancel</button>
+          <button type="submit" class="btn-primary">Publish to All APKs</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

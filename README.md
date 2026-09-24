@@ -80,7 +80,8 @@ Every time you `git push` code changes to the `main` branch, GitHub Actions auto
    ```
    app/build/outputs/apk/release/app-release.apk
    ```
-4. Uploads the generated APK as a downloadable **GitHub Actions artifact** named `Royal-X-APK`.
+4. Uploads the generated APK as a downloadable **GitHub Actions artifact** named `ERAN-MONEY-APK`.
+5. Publishes or updates the GitHub Release titled **"ERAN MONEY"** with `ERAN-MONEY-APK.apk` directly attached under **Assets**.
 
 ### Manual Trigger (Workflow Dispatch)
 You can also trigger a build manually anytime without making a commit:
@@ -88,14 +89,19 @@ You can also trigger a build manually anytime without making a commit:
 2. Click the **Actions** tab at the top.
 3. In the left sidebar, click **Build Release APK**.
 4. Click the **Run workflow** dropdown on the right side.
-5. Select the `main` branch and click **Run workflow**.
+5. Enter or confirm the release tag (e.g. `v1.0.0`) and click **Run workflow**.
 
 ---
 
 ## 5. Where to Find the Generated APK
 
-### In GitHub Actions
-- **Workflow Run Artifacts**: Under the **Artifacts** section of the completed workflow run, named **`Royal-X-APK`**.
+### In GitHub Releases (Direct .apk Download)
+- Navigate to the **Releases** page of your GitHub repository.
+- Under the **ERAN MONEY** release, look under the **Assets** section.
+- Click on **`ERAN-MONEY-APK.apk`** to download the APK file directly to your phone or computer.
+
+### In GitHub Actions (Workflow Artifacts)
+- **Workflow Run Artifacts**: Under the **Artifacts** section of the completed workflow run, named **`ERAN-MONEY-APK`**.
 
 ### In Local Builds
 When built on your computer or local machine, the APK is located at:
@@ -108,12 +114,10 @@ app/build/outputs/apk/release/app-release.apk
 ## 6. How to Download the APK from GitHub Actions
 
 1. Go to your repository on [GitHub](https://github.com).
-2. Click on the **Actions** tab.
-3. Click on the latest workflow run (e.g. *"Build Release APK"*).
-4. Wait for the workflow status to show a green checkmark (completed).
-5. Scroll down to the bottom of the summary page to the **Artifacts** section.
-6. Click on **`Royal-X-APK`** to download the ZIP file containing `app-release.apk`.
-7. Extract the ZIP file on your computer or phone and install `app-release.apk` directly on your Android device!
+2. Click on the **Releases** tab on the right side (or **Actions** tab).
+3. Under the **ERAN MONEY** release, scroll to **Assets**.
+4. Click **`ERAN-MONEY-APK.apk`** to download it directly without needing to unzip anything!
+5. Install `ERAN-MONEY-APK.apk` on your Android phone!
 
 ---
 
