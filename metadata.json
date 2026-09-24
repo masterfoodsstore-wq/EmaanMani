@@ -1,0 +1,8 @@
+{
+  "name": "Dragon vs Tiger",
+  "description": "AAA 3D Zoo Roulette, Dragon Tiger & Chicken Dash non-monetary arcade game suite with secure admin dashboard, real-time live telemetry monitor, and multi-game arcade lobby.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

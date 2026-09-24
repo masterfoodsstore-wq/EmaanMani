@@ -1,0 +1,44 @@
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+build/
+app/build/
+.gradle/
+.build-outputs/
+
+# Gradle and Local Properties
+local.properties
+.idea/
+.DS_Store
+*.iml
+
+# Android Keystores & Signing Secrets (MANDATORY SECURITY PROTECTION)
+*.jks
+*.keystore
+*.key
+signing.properties
+release-keystore.properties
+*.pem
+*.p12
+
+# Environment variables & secrets
+.env
+.env.local
+secrets.properties
+
+# Backup files
+*.bak
+*~
