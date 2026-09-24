@@ -67,21 +67,20 @@ git push -u origin main
 
 ## 4. How the GitHub Actions Workflow Works & How to Run It
 
-The automated build workflow is configured in `.github/workflows/build-apk.yml`.
+The automated build workflow is configured in `.github/workflows/build-release-apk.yml`.
 
 ### Automatic Trigger
 Every time you `git push` code changes to the `main` branch, GitHub Actions automatically:
-1. Provisions an Ubuntu runner with **Java 21 (Temurin)** and **Android SDK 36**.
+1. Provisions an Ubuntu 24.04 runner with **Java 21 (Temurin)** and the runner's pre-installed **Android SDK**.
 2. Prepares the Gradle wrapper and executes:
    ```bash
-   ./gradlew assembleRelease
+   ./gradlew assembleRelease --stacktrace
    ```
 3. Verifies that the release APK is created at:
    ```
    app/build/outputs/apk/release/app-release.apk
    ```
-4. Uploads the generated APK as a downloadable **GitHub Actions artifact** named `app-release`.
-5. Publishes a GitHub Release with the APK attached.
+4. Uploads the generated APK as a downloadable **GitHub Actions artifact** named `Royal-X-APK`.
 
 ### Manual Trigger (Workflow Dispatch)
 You can also trigger a build manually anytime without making a commit:
@@ -96,8 +95,7 @@ You can also trigger a build manually anytime without making a commit:
 ## 5. Where to Find the Generated APK
 
 ### In GitHub Actions
-- **Workflow Run Artifacts**: Under the **Artifacts** section of the completed workflow run, named **`app-release`**.
-- **GitHub Releases**: Under the **Releases** tab of your repository (tagged `v1.0.0`).
+- **Workflow Run Artifacts**: Under the **Artifacts** section of the completed workflow run, named **`Royal-X-APK`**.
 
 ### In Local Builds
 When built on your computer or local machine, the APK is located at:
@@ -114,10 +112,8 @@ app/build/outputs/apk/release/app-release.apk
 3. Click on the latest workflow run (e.g. *"Build Release APK"*).
 4. Wait for the workflow status to show a green checkmark (completed).
 5. Scroll down to the bottom of the summary page to the **Artifacts** section.
-6. Click on **`app-release`** to download the ZIP file containing `app-release.apk`.
+6. Click on **`Royal-X-APK`** to download the ZIP file containing `app-release.apk`.
 7. Extract the ZIP file on your computer or phone and install `app-release.apk` directly on your Android device!
-
-*(Alternative: Go to your repo's **Releases** page on GitHub and download `app-release.apk` directly without extracting a zip).*
 
 ---
 
