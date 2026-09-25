@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Dragon vs Tiger"
+rootProject.name = "RoyalX PKR"
 include(":app")

@@ -93,37 +93,9 @@ class PaymentRepository {
             )
         )
 
-        // Seed initial demo user
-        val demoUserId = nextUserId.getAndIncrement()
-        val demoUser = User(
-            id = demoUserId,
-            name = "Hamza Malik",
-            mobile = "03001234567",
-            whatsappNumber = "03001234567",
-            isWhatsappVerified = true,
-            status = AccountStatus.ACTIVE,
-            balance = NEW_ACCOUNT_BONUS_RS,
-            reservedBalance = 0.0,
-            referralCode = "VIP777"
-        )
-        userPasswordHashes[demoUserId] = hashPassword("User@123")
-        _users.value = listOf(demoUser)
+        _users.value = emptyList()
 
-        // Seed initial ledger transactions
-        val tId = nextTransactionId.getAndIncrement()
-        _transactions.value = listOf(
-            LedgerTransaction(
-                id = tId,
-                userId = demoUserId,
-                type = TransactionType.DEPOSIT,
-                referenceType = "WELCOME_BONUS",
-                referenceId = 5000,
-                amount = NEW_ACCOUNT_BONUS_RS,
-                balanceBefore = 0.0,
-                balanceAfter = NEW_ACCOUNT_BONUS_RS,
-                description = "New Account Welcome Bonus: 20 RS"
-            )
-        )
+        _transactions.value = emptyList()
     }
 
     private fun hashPassword(password: String): String {

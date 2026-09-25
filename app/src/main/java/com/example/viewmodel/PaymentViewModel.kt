@@ -90,14 +90,10 @@ class PaymentViewModel(
     val liveGameConfig: StateFlow<LiveGameConfig> = LiveGameConfigManager.config
 
     init {
-        // Log in demo user by default so user dashboard is immediately interactive
-        val initialUser = repository.users.value.firstOrNull()
+        // No automatic login for demo users
         _uiState.update {
             it.copy(
-                currentUser = initialUser,
-                depositSenderNumber = initialUser?.mobile ?: "03001234567",
-                withdrawAccountName = initialUser?.name ?: "Hamza Malik",
-                withdrawAccountNumber = initialUser?.mobile ?: "03001234567"
+                currentUser = null
             )
         }
 
@@ -165,7 +161,7 @@ class PaymentViewModel(
                 )
             }
         } else {
-            showSnackbar("Invalid Admin Credentials. Correct Password is: Admin@786")
+            showSnackbar("Invalid Administrator credentials.")
         }
     }
 
@@ -222,6 +218,18 @@ class PaymentViewModel(
 
     fun submitLogin() {
         val s = _uiState.value
+        val cleanInput = s.loginMobile.trim().lowercase()
+        if (cleanInput == "admin@system.com" && s.loginPassword == "Admin@786") {
+            _uiState.update {
+                it.copy(
+                    isAdminMode = true,
+                    adminEmail = "admin@system.com",
+                    currentView = AppView.ADMIN_DASHBOARD,
+                    snackbarMessage = "Authenticated as Administrator"
+                )
+            }
+            return
+        }
         val (user, msg) = repository.login(s.loginMobile, s.loginPassword)
         if (user != null) {
             _uiState.update {

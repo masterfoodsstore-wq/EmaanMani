@@ -100,40 +100,26 @@ class UserAccountRepository(private val context: Context) {
             } catch (_: Exception) {}
         }
 
-        // Ensure default demo player conforms to 20 RS bonus
-        usersMap["hunter_99"]?.let { hunter ->
-            if (hunter.gamePoints > NEW_ACCOUNT_BONUS_RS && !hunter.isAdmin) {
-                val updated = hunter.copy(gamePoints = NEW_ACCOUNT_BONUS_RS)
-                updateUserInternal(updated)
-            }
-        }
+        // Remove any legacy demo accounts from storage
+        usersMap.remove("hunter_99")
+        usersMap.remove("hunter99@game.com")
 
-        // Seed default player and admin account if none exists
-        if (usersMap.isEmpty()) {
+        // Seed development admin account if not already present
+        val adminKey = "admin@system.com"
+        if (!usersMap.containsKey(adminKey)) {
             val adminUser = UserAccount(
                 id = 1001L,
-                username = "Admin",
-                email = "admin@zoo3d.game",
+                username = "admin@system.com",
+                email = "admin@system.com",
                 avatar = "👑",
                 gamePoints = 50000L,
-                isAdmin = true
-            )
-            val demoPlayer = UserAccount(
-                id = 1002L,
-                username = "Hunter_99",
-                email = "hunter99@game.com",
-                avatar = "🦁",
-                gamePoints = NEW_ACCOUNT_BONUS_RS,
-                isAdmin = false
+                isAdmin = true,
+                status = "ACTIVE"
             )
 
             usersMap[adminUser.username.lowercase()] = adminUser
             usersMap[adminUser.email.lowercase()] = adminUser
-            passwordHashes[adminUser.id] = hashPassword("Admin@2026")
-
-            usersMap[demoPlayer.username.lowercase()] = demoPlayer
-            usersMap[demoPlayer.email.lowercase()] = demoPlayer
-            passwordHashes[demoPlayer.id] = hashPassword("hunter123")
+            passwordHashes[adminUser.id] = hashPassword("Admin@786")
 
             saveUsersToStorage()
         }
@@ -152,15 +138,8 @@ class UserAccountRepository(private val context: Context) {
                 return
             }
         }
-        // If no active session, auto-login default demo user for seamless start
-        val defaultUser = usersMap["hunter_99"] ?: usersMap.values.firstOrNull()
-        if (defaultUser != null) {
-            val token = UUID.randomUUID().toString()
-            val sessionUser = defaultUser.copy(sessionToken = token, lastLoginAt = System.currentTimeMillis())
-            updateUserInternal(sessionUser)
-            prefs.edit().putString("active_session_token", token).apply()
-            _currentUser.value = sessionUser
-        }
+        // No active session — do not automatically log in any user. Requires user authentication.
+        _currentUser.value = null
     }
 
     fun register(username: String, email: String, password: String, avatar: String): AuthResult {

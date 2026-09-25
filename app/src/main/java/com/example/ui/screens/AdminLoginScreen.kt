@@ -352,38 +352,6 @@ fun AdminLoginScreen(
                 }
             }
 
-            // Quick Demo Admin Unlock (Calls server-side salted SHA-256 verification)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFF16233B))
-                    .border(1.dp, GoldCore.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
-                    .clickable(
-                        enabled = lockoutSeconds <= 0L,
-                        onClick = {
-                            adminId = "superadmin"
-                            password = "Admin@Zoo3D#2026"
-                            onAuthenticate("superadmin", "Admin@Zoo3D#2026", rememberMe)
-                        }
-                    )
-                    .padding(vertical = 10.dp, horizontal = 12.dp)
-                    .testTag("btn_admin_quick_unlock"),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(text = "⚡", fontSize = 12.sp)
-                    Text(
-                        text = "Quick Demo Admin Unlock (Salted SHA-256 Verification)",
-                        color = GoldCore,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
 
             // Security Architecture Notice
             Text(

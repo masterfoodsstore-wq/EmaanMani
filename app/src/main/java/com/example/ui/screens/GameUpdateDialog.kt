@@ -269,7 +269,7 @@ fun GameUpdateDialog(
                                 .padding(10.dp)
                         ) {
                             Text(
-                                text = "APK asset is missing from this GitHub release. Please wait for the developer to upload MyGame-${latestRelease.versionName}.apk.",
+                                text = "APK asset is missing from this GitHub release in masterfoodsstore-wq/EmaanMani. Please wait for the developer to upload the release APK.",
                                 color = Color(0xFFFF8A80),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold

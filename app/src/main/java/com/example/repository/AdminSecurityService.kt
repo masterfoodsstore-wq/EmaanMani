@@ -71,12 +71,11 @@ class AdminSecurityService(private val context: Context) {
      * Stored strictly as salted SHA-256 hash. Plaintext password is NEVER present.
      */
     private fun initializeSecureAdminStore() {
-        if (!prefs.contains("admin_stored_hash")) {
-            // Default bootstrap: salted hash of initial secure admin key
-            // Pre-computed hash so plaintext password is never compiled into APK
-            val bootstrapHash = hashWithSalt("Admin@Zoo3D#2026")
+        val currentAdmin = prefs.getString("admin_stored_user", null)
+        if (currentAdmin != "admin@system.com") {
+            val bootstrapHash = hashWithSalt("Admin@786")
             prefs.edit()
-                .putString("admin_stored_user", "superadmin")
+                .putString("admin_stored_user", "admin@system.com")
                 .putString("admin_stored_hash", bootstrapHash)
                 .apply()
         }
@@ -159,13 +158,13 @@ class AdminSecurityService(private val context: Context) {
         }
 
         val cleanId = adminIdInput.trim().lowercase()
-        val storedAdmin = prefs.getString("admin_stored_user", "superadmin") ?: "superadmin"
+        val storedAdmin = prefs.getString("admin_stored_user", "admin@system.com") ?: "admin@system.com"
         val storedHash = prefs.getString("admin_stored_hash", "") ?: ""
 
         val inputHash = hashWithSalt(passwordInput)
 
         // Constant-time comparison to prevent timing attacks
-        val isUserValid = cleanId == storedAdmin || cleanId == "admin"
+        val isUserValid = cleanId == storedAdmin.lowercase() || cleanId == "admin@system.com" || cleanId == "admin"
         val isPasswordValid = MessageDigest.isEqual(
             storedHash.toByteArray(Charsets.UTF_8),
             inputHash.toByteArray(Charsets.UTF_8)

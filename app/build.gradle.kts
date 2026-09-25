@@ -21,7 +21,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.aistudio.dragontiger.wqpz"
+        applicationId = "com.royalx.pkr"
         minSdk = 24
         targetSdk = 36
         versionCode = appVersionCode
@@ -29,9 +29,10 @@ android {
 
         buildConfigField("String", "VERSION_NAME", "\"$appVersionName\"")
         buildConfigField("int", "VERSION_CODE", "$appVersionCode")
-        buildConfigField("String", "DEFAULT_GITHUB_OWNER", "\"masterfoodsstore\"")
-        buildConfigField("String", "DEFAULT_GITHUB_REPO", "\"dragon-vs-tiger\"")
-        buildConfigField("String", "APK_FILENAME_PREFIX", "\"MyGame-v\"")
+        buildConfigField("String", "DEFAULT_GITHUB_OWNER", "\"masterfoodsstore-wq\"")
+        buildConfigField("String", "DEFAULT_GITHUB_REPO", "\"EmaanMani\"")
+        buildConfigField("String", "DEFAULT_GITHUB_BRANCH", "\"main\"")
+        buildConfigField("String", "APK_FILENAME_PREFIX", "\"RoyalX-PKR-v\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

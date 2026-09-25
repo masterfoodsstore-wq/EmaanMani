@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class GamingUiState(
-    val currentScreen: Screen = Screen.HOME,
+    val currentScreen: Screen = Screen.AUTH,
     val walletInitialView: AppView = AppView.USER_DASHBOARD,
     val isOnline: Boolean = true,
     val isCheckingConnection: Boolean = false,
@@ -791,7 +791,8 @@ class GamingViewModel(application: Application) : AndroidViewModel(application) 
 
     fun navigateToScreen(screen: Screen) {
         if (screen == Screen.ADMIN_MONITOR || screen == Screen.ADMIN_UPDATES) {
-            if (!adminSecurityService.isSessionActive()) {
+            val user = _uiState.value.currentUser
+            if (user?.isAdmin != true || !adminSecurityService.isSessionActive()) {
                 _uiState.update {
                     it.copy(
                         currentScreen = Screen.ADMIN_LOGIN,
@@ -805,7 +806,8 @@ class GamingViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun navigateToAdminPortal() {
-        if (adminSecurityService.isSessionActive()) {
+        val user = _uiState.value.currentUser
+        if (user?.isAdmin == true && adminSecurityService.isSessionActive()) {
             adminSecurityService.logAction(
                 adminId = _uiState.value.adminSession?.adminId ?: "admin",
                 action = "INSPECT_MONITOR",
@@ -841,13 +843,25 @@ class GamingViewModel(application: Application) : AndroidViewModel(application) 
     fun login(usernameOrEmail: String, password: String, rememberMe: Boolean) {
         when (val res = userAccountRepo.login(usernameOrEmail, password, rememberMe)) {
             is AuthResult.Success -> {
-                _uiState.update {
-                    it.copy(
-                        currentUser = res.user,
-                        credits = res.user.gamePoints,
-                        authError = null,
-                        currentScreen = Screen.HOME
-                    )
+                if (res.user.isAdmin) {
+                    adminSecurityService.authenticate(usernameOrEmail, password, rememberMe)
+                    _uiState.update {
+                        it.copy(
+                            currentUser = res.user,
+                            credits = res.user.gamePoints,
+                            authError = null,
+                            currentScreen = Screen.ADMIN_MONITOR
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            currentUser = res.user,
+                            credits = res.user.gamePoints,
+                            authError = null,
+                            currentScreen = Screen.HOME
+                        )
+                    }
                 }
             }
             is AuthResult.Error -> {
@@ -891,11 +905,7 @@ class GamingViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun quickDemoLogin(isAdmin: Boolean) {
-        if (isAdmin) {
-            login("Admin", "Admin@2026", true)
-        } else {
-            login("Hunter_99", "hunter123", true)
-        }
+        // Demo shortcuts disabled as per security requirements
     }
 
     // --- GitHub Releases Update Engine ---

@@ -35,9 +35,8 @@ fun AuthScreen(
     viewModel: PaymentViewModel,
     isRegister: Boolean
 ) {
-    // 0 = Member Login, 1 = Member Register, 2 = Admin Portal
-    var authMode by remember(isRegister) { mutableStateOf(if (isRegister) 1 else 0) }
-    var showAdminPassword by remember { mutableStateOf(false) }
+    // 1 = Create Account, 0 = Member Login
+    var authMode by remember(isRegister) { mutableStateOf(if (isRegister) 1 else 1) }
 
     Column(
         modifier = Modifier
@@ -100,9 +99,8 @@ fun AuthScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             listOf(
-                Triple(0, "Member Login", Icons.Default.Person),
-                Triple(1, "Register", Icons.Default.AppRegistration),
-                Triple(2, "Admin Login", Icons.Default.Security)
+                Triple(1, "Create Account", Icons.Default.AppRegistration),
+                Triple(0, "Member Login", Icons.Default.Person)
             ).forEach { (mode, label, icon) ->
                 val isSelected = authMode == mode
                 Box(
@@ -156,20 +154,6 @@ fun AuthScreen(
                     // 0: MEMBER LOGIN
                     // =========================================================
                     0 -> {
-                        // Quick credentials helper for test
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFF0F172A))
-                                .padding(12.dp)
-                        ) {
-                            Column {
-                                Text("DEFAULT DEMO MEMBER CREDENTIALS:", color = Color(0xFF64748B), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text("Mobile: 03001234567 | Password: User@123", color = Color(0xFF38BDF8), fontSize = 12.sp, fontFamily = FontFamily.Monospace)
-                            }
-                        }
 
                         OutlinedTextField(
                             value = uiState.loginMobile,
@@ -374,122 +358,6 @@ fun AuthScreen(
                         }
                     }
 
-                    // =========================================================
-                    // 2: ADMIN SETUP & LOGIN
-                    // =========================================================
-                    2 -> {
-                        // Admin Credentials Card
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF2D1520))
-                                .border(1.dp, Color(0xFFE11D48).copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                                .padding(14.dp)
-                        ) {
-                            Column {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.VpnKey, contentDescription = null, tint = Color(0xFFF43F5E), modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text("OFFICIAL SUPER ADMIN CREDENTIALS", color = Color(0xFFFDA4AF), fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Column {
-                                        Text("Admin Login / Email:", color = Color(0xFF94A3B8), fontSize = 11.sp)
-                                        Text("admin@system.com", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-                                    }
-                                    Column {
-                                        Text("Master Password:", color = Color(0xFF94A3B8), fontSize = 11.sp)
-                                        Text("Admin@786", color = Color(0xFFF43F5E), fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, fontFamily = FontFamily.Monospace)
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Button(
-                                    onClick = {
-                                        viewModel.updateAdminLoginEmail("admin@system.com")
-                                        viewModel.updateAdminLoginPassword("Admin@786")
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4C0519)),
-                                    shape = RoundedCornerShape(8.dp),
-                                    modifier = Modifier.fillMaxWidth().height(36.dp)
-                                ) {
-                                    Icon(Icons.Default.ContentCopy, contentDescription = null, tint = Color(0xFFFDA4AF), modifier = Modifier.size(14.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Auto-Fill Admin Credentials", color = Color(0xFFFDA4AF), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                                }
-                            }
-                        }
-
-                        OutlinedTextField(
-                            value = uiState.adminLoginEmail,
-                            onValueChange = { viewModel.updateAdminLoginEmail(it) },
-                            label = { Text("Admin Email / ID") },
-                            leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null, tint = Color(0xFFF43F5E)) },
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFE11D48),
-                                unfocusedBorderColor = Color(0xFF334155)
-                            ),
-                            modifier = Modifier.fillMaxWidth().testTag("admin_login_email_input")
-                        )
-
-                        OutlinedTextField(
-                            value = uiState.adminLoginPassword,
-                            onValueChange = { viewModel.updateAdminLoginPassword(it) },
-                            label = { Text("Admin Master Password") },
-                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFF43F5E)) },
-                            trailingIcon = {
-                                IconButton(onClick = { showAdminPassword = !showAdminPassword }) {
-                                    Icon(
-                                        imageVector = if (showAdminPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                        contentDescription = null,
-                                        tint = Color(0xFF94A3B8)
-                                    )
-                                }
-                            },
-                            visualTransformation = if (showAdminPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color(0xFFE11D48),
-                                unfocusedBorderColor = Color(0xFF334155)
-                            ),
-                            modifier = Modifier.fillMaxWidth().testTag("admin_login_pass_input")
-                        )
-
-                        Button(
-                            onClick = { viewModel.submitAdminLogin() },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE11D48)),
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.fillMaxWidth().height(50.dp).testTag("submit_admin_login_btn")
-                        ) {
-                            Icon(Icons.Default.Security, contentDescription = null, tint = Color.White)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("LOGIN TO ADMIN PANEL", fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
-                        }
-
-                        // Admin Permissions & Capabilities Guide
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFF0F172A))
-                                .padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text("ADMIN PRIVILEGES & SCOPE:", color = Color(0xFF94A3B8), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                            Text("• Reconcile pending EasyPaisa, JazzCash, FlashPay deposits", color = Color(0xFFCBD5E1), fontSize = 11.sp)
-                            Text("• Authorize member withdrawals & record bank TRX IDs", color = Color(0xFFCBD5E1), fontSize = 11.sp)
-                            Text("• Freeze / Unfreeze member accounts & balance liabilities", color = Color(0xFFCBD5E1), fontSize = 11.sp)
-                            Text("• Configure payment till numbers, limits, and fee percentages", color = Color(0xFFCBD5E1), fontSize = 11.sp)
-                            Text("• Inspect double-entry immutable financial ledger & audit logs", color = Color(0xFFCBD5E1), fontSize = 11.sp)
-                        }
-                    }
                 }
             }
         }
@@ -501,37 +369,24 @@ fun AuthScreen(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            when (authMode) {
-                0 -> {
-                    Text("Need a member account? ", color = Color(0xFF94A3B8), fontSize = 13.sp)
-                    Text(
-                        text = "Register with WhatsApp OTP",
-                        color = Color(0xFF818CF8),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { authMode = 1 }
-                    )
-                }
-                1 -> {
-                    Text("Already registered? ", color = Color(0xFF94A3B8), fontSize = 13.sp)
-                    Text(
-                        text = "Member Login",
-                        color = Color(0xFF818CF8),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { authMode = 0 }
-                    )
-                }
-                2 -> {
-                    Text("Switch back to ", color = Color(0xFF94A3B8), fontSize = 13.sp)
-                    Text(
-                        text = "Member Area",
-                        color = Color(0xFF818CF8),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { authMode = 0 }
-                    )
-                }
+            if (authMode == 0) {
+                Text("Need an account? ", color = Color(0xFF94A3B8), fontSize = 13.sp)
+                Text(
+                    text = "Create Account",
+                    color = Color(0xFF818CF8),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { authMode = 1 }
+                )
+            } else {
+                Text("Already registered? ", color = Color(0xFF94A3B8), fontSize = 13.sp)
+                Text(
+                    text = "Member Login",
+                    color = Color(0xFF818CF8),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { authMode = 0 }
+                )
             }
         }
     }

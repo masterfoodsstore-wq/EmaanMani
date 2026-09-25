@@ -65,12 +65,12 @@ fun UserAuthScreen(
     onLogin: (String, String, Boolean) -> Unit,
     onRegister: (String, String, String, String) -> Unit,
     onForgotPassword: (String, String) -> Unit,
-    onQuickDemoLogin: (Boolean) -> Unit, // true for Admin, false for Hunter_99
+    onQuickDemoLogin: ((Boolean) -> Unit)? = null,
     onNavigateBack: (() -> Unit)? = null,
     errorMessage: String? = null,
     modifier: Modifier = Modifier
 ) {
-    var isLoginTab by remember { mutableStateOf(true) }
+    var isLoginTab by remember { mutableStateOf(false) }
     var showForgotPasswordModal by remember { mutableStateOf(false) }
 
     // Login Form State
@@ -149,14 +149,14 @@ fun UserAuthScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "ZOO ROULETTE 3D",
+                        text = "ROYALX PKR",
                         color = GoldCore,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.5.sp
                     )
                     Text(
-                        text = "NON-MONETARY ARCADE PLATFORM",
+                        text = "VIP ARCADE & ENTERTAINMENT",
                         color = Color(0xFFA5D6A7),
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
@@ -164,7 +164,7 @@ fun UserAuthScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Play 3D Zoo Roulette & Dragon Tiger with free entertainment points. No real-money gambling.",
+                        text = "Play Dragon Tiger, 3D Zoo Roulette & Cyber Slots with free bonus entertainment points.",
                         color = Color(0xFFC8E6C9),
                         fontSize = 10.sp,
                         lineHeight = 14.sp,
@@ -172,59 +172,39 @@ fun UserAuthScreen(
                     )
                 }
 
-                // Quick Demo Login Shortcut
+                // VIP Platform Highlights
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF092817))
+                        .border(1.dp, GoldCore.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                        .padding(10.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = "QUICK DEMO ACCESS",
+                        text = "MEMBER BENEFITS",
                         color = GoldLight,
                         fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFF0F472A))
-                                .border(1.dp, GoldCore.copy(alpha = 0.6f), RoundedCornerShape(10.dp))
-                                .clickable { onQuickDemoLogin(false) }
-                                .padding(vertical = 8.dp)
-                                .testTag("demo_player_login"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "👤 Hunter_99",
-                                color = Color.White,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFF4A148C))
-                                .border(1.dp, GoldCore.copy(alpha = 0.6f), RoundedCornerShape(10.dp))
-                                .clickable { onQuickDemoLogin(true) }
-                                .padding(vertical = 8.dp)
-                                .testTag("demo_admin_login"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "👑 Admin",
-                                color = GoldLight,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
+                    Text(
+                        text = "🎁 Instant 20 RS Welcome Bonus",
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "⚡ Real-Time Cloud Sync & Wallet",
+                        color = Color(0xFFA5D6A7),
+                        fontSize = 10.sp
+                    )
+                    Text(
+                        text = "🛡️ Secure & Verified Gaming",
+                        color = Color(0xFFA5D6A7),
+                        fontSize = 10.sp
+                    )
                 }
             }
 

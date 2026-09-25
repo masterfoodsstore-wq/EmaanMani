@@ -54,16 +54,20 @@ class GameUpdateManager(private val context: Context) {
     )
     val currentVersion: StateFlow<String> = _currentVersion.asStateFlow()
 
-    // Configurable GitHub Repository (defaults to project repository)
+    // Configurable GitHub Repository (defaults to project repository: masterfoodsstore-wq/EmaanMani, branch: main)
     private val _githubOwner = MutableStateFlow(
-        prefs.getString("github_owner", BuildConfig.DEFAULT_GITHUB_OWNER) ?: BuildConfig.DEFAULT_GITHUB_OWNER
+        prefs.getString("github_owner", null)?.takeIf { it != "masterfoodsstore" }
+            ?: BuildConfig.DEFAULT_GITHUB_OWNER
     )
     val githubOwner: StateFlow<String> = _githubOwner.asStateFlow()
 
     private val _githubRepo = MutableStateFlow(
-        prefs.getString("github_repo", BuildConfig.DEFAULT_GITHUB_REPO) ?: BuildConfig.DEFAULT_GITHUB_REPO
+        prefs.getString("github_repo", null)?.takeIf { it != "dragon-vs-tiger" }
+            ?: BuildConfig.DEFAULT_GITHUB_REPO
     )
     val githubRepo: StateFlow<String> = _githubRepo.asStateFlow()
+
+    val githubBranch: String = BuildConfig.DEFAULT_GITHUB_BRANCH
 
     private val _updateCheckResult = MutableStateFlow<UpdateCheckResult?>(null)
     val updateCheckResult: StateFlow<UpdateCheckResult?> = _updateCheckResult.asStateFlow()
@@ -269,7 +273,7 @@ class GameUpdateManager(private val context: Context) {
         val conn = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             setRequestProperty("Accept", "application/vnd.github.v3+json")
-            setRequestProperty("User-Agent", "DragonVsTiger-AndroidGame/1.0.0")
+            setRequestProperty("User-Agent", "RoyalX-PKR-EmaanMani/1.0.0")
             connectTimeout = 10000
             readTimeout = 10000
         }
@@ -375,7 +379,7 @@ class GameUpdateManager(private val context: Context) {
     suspend fun downloadAndApplyUpdate(release: GameRelease) = withContext(Dispatchers.IO) {
         if (release.downloadUrl.isBlank()) {
             _updateProgress.value = UpdateProgressState.Failed(
-                "No APK release asset attached to this GitHub release (expected MyGame-${release.versionName}.apk). Please check the repository releases."
+                "No APK release asset attached to this GitHub release in masterfoodsstore-wq/EmaanMani. Please check repository releases."
             )
             return@withContext
         }
@@ -405,7 +409,7 @@ class GameUpdateManager(private val context: Context) {
                 connection.instanceFollowRedirects = true
                 connection.connectTimeout = 15000
                 connection.readTimeout = 20000
-                connection.setRequestProperty("User-Agent", "DragonVsTiger-AndroidGame/1.0.0")
+                connection.setRequestProperty("User-Agent", "RoyalX-PKR-EmaanMani/1.0.0")
 
                 val status = connection.responseCode
                 if (status == HttpURLConnection.HTTP_MOVED_TEMP ||

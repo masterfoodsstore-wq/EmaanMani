@@ -151,28 +151,7 @@ fun WalletRootScreen(
                 }
             }
 
-            // Quick Floating Admin / User View Toggle (to inspect either experience easily)
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.BottomEnd
-            ) {
-                FloatingActionButton(
-                    onClick = {
-                        paymentViewModel.toggleAdminMode(!uiState.isAdminMode)
-                    },
-                    containerColor = if (uiState.isAdminMode) Color(0xFF6366F1) else Color(0xFFDC2626),
-                    contentColor = Color.White
-                ) {
-                    Text(
-                        text = if (uiState.isAdminMode) "👤 User" else "🛡️ Admin",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                }
-            }
+
         }
     }
 }

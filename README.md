@@ -25,15 +25,19 @@ A native Android game suite featuring Zoo Roulette 3D and Dragon vs. Tiger card 
 
 ---
 
-## 2. How to Create a GitHub Repository
+## 2. GitHub Repository Configuration
 
-1. Open your browser and log in to [GitHub](https://github.com).
-2. Click the **+** (plus icon) in the top-right corner of the page and select **New repository**.
-3. Choose a repository name (for example, `dragon-vs-tiger` or `my-game-app`).
-4. Set the visibility to **Public** or **Private** based on your preference.
-5. **IMPORTANT**: Do **NOT** check "Add a README file", "Add .gitignore", or "Choose a license" (leave them unchecked since this project already includes them).
-6. Click **Create repository**.
-7. Copy the repository URL (e.g. `https://github.com/<YOUR_USERNAME>/<REPO_NAME>.git`).
+- **Repository**: `masterfoodsstore-wq/EmaanMani`
+- **URL**: `https://github.com/masterfoodsstore-wq/EmaanMani`
+- **Default Branch**: `main`
+
+If you are setting up or syncing the repository:
+1. Open your browser and navigate to [GitHub](https://github.com).
+2. Ensure the repository `masterfoodsstore-wq/EmaanMani` is created.
+3. The remote repository URL is:
+   ```
+   https://github.com/masterfoodsstore-wq/EmaanMani.git
+   ```
 
 ---
 
@@ -54,8 +58,8 @@ git commit -m "Initial commit: GitHub-ready Android project with CI/CD"
 # 4. Set the primary branch to main
 git branch -M main
 
-# 5. Add your GitHub remote repository (replace with your actual GitHub URL)
-git remote add origin https://github.com/<YOUR_USERNAME>/<REPO_NAME>.git
+# 5. Add your GitHub remote repository
+git remote add origin https://github.com/masterfoodsstore-wq/EmaanMani.git
 
 # 6. Push code to GitHub
 git push -u origin main
@@ -113,7 +117,7 @@ app/build/outputs/apk/release/app-release.apk
 
 ## 6. How to Download the APK from GitHub Actions
 
-1. Go to your repository on [GitHub](https://github.com).
+1. Go to your repository on [GitHub (masterfoodsstore-wq/EmaanMani)](https://github.com/masterfoodsstore-wq/EmaanMani).
 2. Click on the **Releases** tab on the right side (or **Actions** tab).
 3. Under the **ERAN MONEY** release, scroll to **Assets**.
 4. Click **`ERAN-MONEY-APK.apk`** to download it directly without needing to unzip anything!

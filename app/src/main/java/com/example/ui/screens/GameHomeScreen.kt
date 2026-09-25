@@ -311,17 +311,19 @@ fun GameHomeScreen(
                     }
                 }
 
-                // Admin Dashboard & Live Telemetry Monitor (Protected Server Route)
-                IconButton(
-                    onClick = { onNavigateToScreen(Screen.ADMIN_MONITOR) },
-                    modifier = Modifier.size(32.dp).testTag("home_admin_button")
-                ) {
-                    Icon(
-                        Icons.Default.AdminPanelSettings,
-                        contentDescription = "Admin Console",
-                        tint = if (user?.isAdmin == true) GoldLight else Color(0xFF80DEEA),
-                        modifier = Modifier.size(18.dp)
-                    )
+                // Admin Dashboard & Live Telemetry Monitor (Restricted strictly to authenticated admins)
+                if (user?.isAdmin == true) {
+                    IconButton(
+                        onClick = { onNavigateToScreen(Screen.ADMIN_MONITOR) },
+                        modifier = Modifier.size(32.dp).testTag("home_admin_button")
+                    ) {
+                        Icon(
+                            Icons.Default.AdminPanelSettings,
+                            contentDescription = "Admin Console",
+                            tint = GoldLight,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
 
                 IconButton(
