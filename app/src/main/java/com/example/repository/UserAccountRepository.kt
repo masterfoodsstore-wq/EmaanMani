@@ -380,6 +380,13 @@ class UserAccountRepository(private val context: Context) {
         _currentUser.value = updated
     }
 
+    fun updateBalance(newPoints: Long) {
+        val user = _currentUser.value ?: return
+        val updated = user.copy(gamePoints = newPoints.coerceAtLeast(0L))
+        updateUserInternal(updated)
+        _currentUser.value = updated
+    }
+
     private fun updateUserInternal(user: UserAccount) {
         usersMap[user.username.lowercase()] = user
         usersMap[user.email.lowercase()] = user

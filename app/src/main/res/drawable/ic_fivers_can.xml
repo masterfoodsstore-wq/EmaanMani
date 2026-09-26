@@ -1,0 +1,59 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    <!-- Outer Glow Circle -->
+    <path
+        android:fillColor="#FF2E1752"
+        android:pathData="M32,4 A28,28 0 1,0 32,60 A28,28 0 1,0 32,4 Z" />
+    <path
+        android:strokeColor="#FFFFD700"
+        android:strokeWidth="2.5"
+        android:pathData="M32,4 A28,28 0 1,0 32,60 A28,28 0 1,0 32,4 Z" />
+
+    <!-- Slot Cabinet / Frame -->
+    <path
+        android:fillColor="#FF180A2E"
+        android:strokeColor="#FFAB47BC"
+        android:strokeWidth="1.5"
+        android:pathData="M16,16 L48,16 A4,4 0 0,1 52,20 L52,44 A4,4 0 0,1 48,48 L16,48 A4,4 0 0,1 12,44 L12,20 A4,4 0 0,1 16,16 Z" />
+
+    <!-- 3 Reel Windows -->
+    <path
+        android:fillColor="#FF0D051A"
+        android:pathData="M16,22 L24,22 L24,42 L16,42 Z" />
+    <path
+        android:fillColor="#FF0D051A"
+        android:pathData="M28,22 L36,22 L36,42 L28,42 Z" />
+    <path
+        android:fillColor="#FF0D051A"
+        android:pathData="M40,22 L48,22 L48,42 L40,42 Z" />
+
+    <!-- Lucky 7 in Middle Reel -->
+    <path
+        android:fillColor="#FFFF1744"
+        android:pathData="M29,26 L35,26 L32,38 L30.5,38 L33,28 L29,28 Z" />
+
+    <!-- Golden Crown at Top -->
+    <path
+        android:fillColor="#FFFFD700"
+        android:pathData="M24,14 L27,11 L32,14 L37,11 L40,14 L39,17 L25,17 Z" />
+
+    <!-- Neon Star Embellishments -->
+    <path
+        android:fillColor="#FF00E5FF"
+        android:pathData="M20,29 L21,31 L23,31 L21.5,32.5 L22,34.5 L20,33 L18,34.5 L18.5,32.5 L17,31 L19,31 Z" />
+    <path
+        android:fillColor="#FF00E676"
+        android:pathData="M44,29 L45,31 L47,31 L45.5,32.5 L46,34.5 L44,33 L42,34.5 L42.5,32.5 L41,31 L43,31 Z" />
+
+    <!-- Handle on right -->
+    <path
+        android:strokeColor="#FFFFD700"
+        android:strokeWidth="2"
+        android:pathData="M52,26 L56,26 L56,34" />
+    <path
+        android:fillColor="#FFFF1744"
+        android:pathData="M56,24 A3,3 0 1,0 56,30 A3,3 0 1,0 56,24 Z" />
+</vector>

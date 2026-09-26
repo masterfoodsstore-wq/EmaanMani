@@ -24,9 +24,24 @@ object FirebaseManager {
     private var isInitialized = false
     private var firebaseApp: FirebaseApp? = null
 
+    /**
+     * Checks if Firebase is initialized with a legitimate production Google API key.
+     * Prevents Recaptcha/IdentityToolkit crashes when using placeholder or sample keys.
+     */
+    fun hasValidCredentials(): Boolean {
+        if (!isInitialized) return false
+        val key = firebaseApp?.options?.apiKey ?: return false
+        return key.isNotBlank() &&
+                !key.contains("SAMPLE", ignoreCase = true) &&
+                !key.contains("ROYAL_X", ignoreCase = true) &&
+                !key.contains("PLACEHOLDER", ignoreCase = true) &&
+                key.startsWith("AIzaSy") &&
+                key.length >= 35
+    }
+
     val auth: FirebaseAuth?
         get() = try {
-            if (isInitialized) FirebaseAuth.getInstance() else null
+            if (isInitialized && hasValidCredentials()) FirebaseAuth.getInstance() else null
         } catch (e: Exception) {
             Log.w(TAG, "FirebaseAuth not ready: ${e.message}")
             null
@@ -34,7 +49,7 @@ object FirebaseManager {
 
     val firestore: FirebaseFirestore?
         get() = try {
-            if (isInitialized) {
+            if (isInitialized && hasValidCredentials()) {
                 val db = FirebaseFirestore.getInstance()
                 // Configure offline persistence cache
                 val cacheSettings = PersistentCacheSettings.newBuilder().build()
@@ -51,13 +66,13 @@ object FirebaseManager {
 
     val functions: FirebaseFunctions?
         get() = try {
-            if (isInitialized) FirebaseFunctions.getInstance() else null
+            if (isInitialized && hasValidCredentials()) FirebaseFunctions.getInstance() else null
         } catch (e: Exception) {
             Log.w(TAG, "FirebaseFunctions not ready: ${e.message}")
             null
         }
 
-    fun isOnlineAvailable(): Boolean = isInitialized && auth != null && firestore != null
+    fun isOnlineAvailable(): Boolean = isInitialized && hasValidCredentials() && auth != null && firestore != null
 
     /**
      * Initializes Firebase safely. If google-services.json is packaged or options exist,

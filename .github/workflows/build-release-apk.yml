@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Release tag name (e.g. v1.0.0 or existing tag)'
+        description: 'Release tag name (e.g. v1.1.0 or existing tag)'
         required: false
-        default: 'v1.0.0'
+        default: 'v1.1.0'
 
 permissions:
   contents: write
@@ -117,18 +117,18 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ inputs.tag_name || (github.ref_type == 'tag' && github.ref_name) || 'v1.0.0' }}
-          name: "ERAN MONEY"
+          tag_name: ${{ inputs.tag_name || (github.ref_type == 'tag' && github.ref_name) || 'v1.1.0' }}
+          name: "EmaanMani v1.1.0"
           body: |
-            ## 📱 ERAN MONEY Official Android Release
+            EmaanMani v1.1.0
 
-            ### ⬇️ Direct APK Download
+            - Updated application version to 1.1.0
+            - Updated current application files
+            - Preserved existing game/application functionality
+
+            ### ⬇️ Direct Release APK Download
             Direct APK file attached below under **Assets**:
             - **ERAN-MONEY-APK.apk**
-
-            ---
-            - **Platform:** Android 7.0+ (API 24+)
-            - **Build Status:** Verified release APK built with `./gradlew assembleRelease`
           draft: false
           prerelease: false
           files: |

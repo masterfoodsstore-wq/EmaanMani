@@ -35,11 +35,15 @@ import com.example.ui.screens.OfflineGameBarrierScreen
 import com.example.ui.screens.UserAuthScreen
 import com.example.ui.screens.WalletRootScreen
 import com.example.ui.ChickenDashGameScreen
+import android.content.pm.ActivityInfo
+import com.example.ui.screens.CyberSlotsGameScreen
+import com.example.ui.screens.FiversCanGameScreen
 import com.example.ui.theme.DragonVsTigerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         enableEdgeToEdge()
         setContent {
             DragonVsTigerTheme {
@@ -160,7 +164,7 @@ fun DragonVsTigerApp(
                         onNavigateToGame = { screen -> viewModel.navigateToScreen(screen) }
                     )
                 }
-                Screen.DRAGON_TIGER, Screen.CYBER_SLOTS -> {
+                Screen.DRAGON_TIGER -> {
                     DragonTigerGame(
                         tableTheme = uiState.tableTheme,
                         credits = uiState.credits,
@@ -185,6 +189,11 @@ fun DragonVsTigerApp(
                         onOpenHistory = { viewModel.openHistory(true) },
                         onOpenSettings = { viewModel.openSettings(true) },
                         onNavigateToLobby = { viewModel.navigateToScreen(Screen.HOME) }
+                    )
+                }
+                Screen.CYBER_SLOTS -> {
+                    FiversCanGameScreen(
+                        onNavigateBack = { viewModel.navigateToScreen(Screen.HOME) }
                     )
                 }
                 Screen.ZOO_ROULETTE -> {

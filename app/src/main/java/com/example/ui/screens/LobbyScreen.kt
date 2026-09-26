@@ -272,13 +272,13 @@ fun LobbyScreen(
                     )
 
                     LobbyMiniGameCard(
-                        title = "Cyber Slots",
+                        title = "FiversCan Slots",
                         chineseTitle = "財神到",
                         icon = "🎰",
-                        badge = "Jackpot",
-                        badgeColor = TigerRed,
+                        badge = "FIVERS CAN",
+                        badgeColor = Color(0xFFAB47BC),
                         modifier = Modifier.weight(1f),
-                        onClick = { onNavigateToGame(Screen.DRAGON_TIGER) }
+                        onClick = { onNavigateToGame(Screen.CYBER_SLOTS) }
                     )
                 }
             }

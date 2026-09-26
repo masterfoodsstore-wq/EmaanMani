@@ -783,6 +783,95 @@ fun GameHomeScreen(
                         }
                     }
                 }
+
+                // GAME 4: CYBER SLOTS (RAPIDAPI POWERED)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(EmeraldCard)
+                        .border(1.5.dp, Color(0xFFAB47BC), RoundedCornerShape(16.dp))
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF311B92), Color(0xFF1A0A38))
+                                )
+                            )
+                            .border(1.dp, Color(0xFFBA68C8), RoundedCornerShape(10.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_fivers_can),
+                            contentDescription = "FiversCan Casino Slots",
+                            modifier = Modifier.size(52.dp)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .clip(RoundedCornerShape(bottomEnd = 8.dp))
+                                .background(Color(0xFF7B1FA2))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text("FIVERS CAN", color = Color(0xFFFFD54F), fontSize = 8.sp, fontWeight = FontWeight.Black)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "FIVERSCAN CASINO",
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        text = "Pragmatic • PGSoft • Live",
+                        color = Color(0xFFE1BEE7),
+                        fontSize = 8.sp,
+                        maxLines = 1
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFFAB47BC), Color(0xFF6A1B9A))
+                                )
+                            )
+                            .border(1.dp, Color(0xFFFFD54F), RoundedCornerShape(10.dp))
+                            .clickable { onNavigateToScreen(Screen.CYBER_SLOTS) }
+                            .padding(vertical = 8.dp)
+                            .testTag("btn_play_cyber_slots"),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            Text(
+                                text = "PLAY NOW",
+                                color = Color.White,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+                    }
+                }
             }
         }
 

@@ -33,6 +33,8 @@ android {
         buildConfigField("String", "DEFAULT_GITHUB_REPO", "\"EmaanMani\"")
         buildConfigField("String", "DEFAULT_GITHUB_BRANCH", "\"main\"")
         buildConfigField("String", "APK_FILENAME_PREFIX", "\"RoyalX-PKR-v\"")
+        buildConfigField("String", "RAPID_API_URL", "\"https://rapidapi.com\"")
+        buildConfigField("String", "RAPID_API_KEY", "\"edd4fc755cmsha53087e4c236150p11e514jsnc92854000a8c\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
