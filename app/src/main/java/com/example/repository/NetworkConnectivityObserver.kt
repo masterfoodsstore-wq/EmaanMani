@@ -37,11 +37,22 @@ class NetworkConnectivityObserver(private val context: Context) {
         recomputeStatus()
     }
 
+    @Suppress("DEPRECATION")
     private fun checkRealNetworkStatus(): Boolean {
-        val cm = connectivityManager ?: return false
-        val activeNetwork = cm.activeNetwork ?: return false
-        val caps = cm.getNetworkCapabilities(activeNetwork) ?: return false
-        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        val cm = connectivityManager ?: return true
+        val activeNetwork = cm.activeNetwork
+        if (activeNetwork != null) {
+            val caps = cm.getNetworkCapabilities(activeNetwork)
+            if (caps != null) {
+                if (caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ||
+                    caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                ) {
+                    return true
+                }
+            }
+        }
+        val info = cm.activeNetworkInfo
+        return info != null && info.isConnected
     }
 
     fun refreshNetworkStatus(): Boolean {

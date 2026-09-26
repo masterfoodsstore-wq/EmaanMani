@@ -3,6 +3,7 @@ package com.example.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import com.example.model.AuthResult
 import com.example.model.BetOption
 import com.example.model.CHIP_OPTIONS
@@ -127,8 +128,10 @@ class GamingViewModel(application: Application) : AndroidViewModel(application) 
     private var zooGameLoopJob: Job? = null
 
     init {
-        // Start real-time Firestore synchronization for live remote game config & broadcast ticker
-        LiveGameConfigManager.startRealtimeSync()
+        // Start real-time Firestore synchronization for live remote game config & broadcast ticker on IO thread
+        viewModelScope.launch(Dispatchers.IO) {
+            LiveGameConfigManager.startRealtimeSync()
+        }
 
         // Collect server-side admin session state
         viewModelScope.launch {

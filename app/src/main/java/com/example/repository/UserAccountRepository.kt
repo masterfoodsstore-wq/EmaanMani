@@ -36,9 +36,11 @@ class UserAccountRepository(private val context: Context) {
     private val repoScope = CoroutineScope(Dispatchers.IO)
 
     init {
-        FirebaseManager.initialize(context)
-        loadUsersFromStorage()
-        restoreSession()
+        repoScope.launch {
+            FirebaseManager.initialize(context)
+            loadUsersFromStorage()
+            restoreSession()
+        }
     }
 
     private fun hashPassword(password: String): String {
