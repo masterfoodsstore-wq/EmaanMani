@@ -45,17 +45,18 @@ class FiversCanViewModel(application: Application) : AndroidViewModel(applicatio
     val uiState: StateFlow<FiversCanUiState> = _uiState.asStateFlow()
 
     init {
-        // Derive player code and initial balance from local session
-        val currentUser = userAccountRepo.currentUser.value
-        val code = currentUser?.username ?: "player_${System.currentTimeMillis() % 10000}"
-        val points = currentUser?.gamePoints ?: 2500L
-
-        _uiState.update {
-            it.copy(
-                userCode = code,
-                userBalance = points.toDouble(),
-                agentBalance = 500000.0
-            )
+        // Observe user account in real time so game balance and lobby balance are always 100% identical
+        viewModelScope.launch {
+            userAccountRepo.currentUser.collect { user ->
+                if (user != null) {
+                    _uiState.update {
+                        it.copy(
+                            userCode = user.username,
+                            userBalance = user.gamePoints.toDouble()
+                        )
+                    }
+                }
+            }
         }
 
         loadProviders()

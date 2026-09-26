@@ -60,7 +60,6 @@ fun DragonVsTigerApp(
     val uiState by viewModel.uiState.collectAsState()
 
     val showTopBar = uiState.currentScreen == Screen.DRAGON_TIGER ||
-            uiState.currentScreen == Screen.CYBER_SLOTS ||
             uiState.currentScreen == Screen.LOBBY
 
     Scaffold(

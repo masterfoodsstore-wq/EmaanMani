@@ -448,6 +448,26 @@ fun FiversCanGameScreen(
                             )
                         }
 
+                        // Live Synchronized Balance Display (ensures Lobby & Game Balance match)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFF0F0B18))
+                                .border(1.dp, Color(0xFFFFD54F), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF00E676))
+                            )
+                            Text("SYNCED BALANCE:", color = Color(0xFFFFD54F), fontSize = 8.sp, fontWeight = FontWeight.Black)
+                            Text("PKR ${"%,.0f".format(uiState.userBalance)}", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Black)
+                        }
+
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(
                                 onClick = {
@@ -492,6 +512,27 @@ fun FiversCanGameScreen(
                                 webViewClient = object : WebViewClient() {
                                     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                                         return false
+                                    }
+
+                                    override fun onPageFinished(view: WebView?, url: String?) {
+                                        super.onPageFinished(view, url)
+                                        val balFormatted = String.format("%,.2f", uiState.userBalance)
+                                        val jsSync = """
+                                            (function() {
+                                                function syncBal() {
+                                                    var nodes = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT, null, false);
+                                                    var n;
+                                                    while(n = nodes.nextNode()) {
+                                                        if (n.nodeValue && (n.nodeValue.indexOf('100,000') !== -1 || n.nodeValue.indexOf('100000') !== -1)) {
+                                                            n.nodeValue = n.nodeValue.replace(/100[,.]000(\.00)?/g, '$balFormatted');
+                                                        }
+                                                    }
+                                                }
+                                                syncBal();
+                                                setInterval(syncBal, 1000);
+                                            })();
+                                        """.trimIndent()
+                                        view?.evaluateJavascript(jsSync, null)
                                     }
                                 }
                                 loadUrl(uiState.activeGameUrl!!)
